@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SheCanCode Leave Management</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+</head>
+<body>
+  <!-- Static file matches existing app -->
+  <!-- We keep the same content and ids so app.js works unchanged -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">S</div>
+      <div class="title">SheCanCode Leave</div>
+    </div>
+    <nav class="nav" id="nav">
+      <button id="nav-dashboard" class="link">Dashboard</button>
+      <button id="nav-apply" class="link">Apply Leave</button>
+      <button id="nav-requests" class="link">My Requests</button>
+      <button id="nav-approvals" class="link hidden">Approvals</button>
+      <button id="nav-holidays" class="link">Holidays</button>
+      <div class="spacer"></div>
+      <div id="userInfo" class="user">
+        <img id="avatar" class="avatar" alt="avatar" />
+        <span id="userName" class="username"></span>
+        <button id="logoutBtn" class="outline">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section id="authSection" class="card">
+      <h2>Welcome</h2>
+      <p class="muted">Sign in or create an account to request and manage your leave.</p>
+      <div class="tabs">
+        <button id="tab-login" class="tab active">Login</button>
+        <button id="tab-register" class="tab">Register</button>
+      </div>
+      <form id="loginForm" class="form">
+        <label>Email
+          <input type="email" id="loginEmail" placeholder="you@example.com" required />
+        </label>
+        <label>Password
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+        </label>
+        <button type="submit" class="primary full">Login</button>
+      </form>
+      <form id="registerForm" class="form hidden">
+        <label>Full name
+          <input type="text" id="regName" placeholder="Jane Doe" required />
+        </label>
+        <label>Email
+          <input type="email" id="regEmail" placeholder="you@example.com" required />
+        </label>
+        <label>Password
+          <input type="password" id="regPassword" placeholder="Create a password" required />
+        </label>
+        <button type="submit" class="primary full">Create account</button>
+      </form>
+      <div id="authMsg" class="message"></div>
+    </section>
+
+    <section id="dashboardSection" class="grid hidden">
+      <div class="card">
+        <h3>Leave Balance</h3>
+        <div class="balance">
+          <div><span class="label">Accrued</span><span id="balAccrued" class="value">-</span></div>
+          <div><span class="label">Used</span><span id="balUsed" class="value">-</span></div>
+          <div><span class="label">Carryover</span><span id="balCarry" class="value">-</span></div>
+          <div><span class="label">Available</span><span id="balAvail" class="value emphasis">-</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Leave Types</h3>
+        <ul id="leaveTypes" class="list"></ul>
+      </div>
+    </section>
+
+    <section id="applySection" class="card hidden">
+      <h3>Apply for Leave</h3>
+      <form id="applyForm" class="form">
+        <label>Leave Type
+          <select id="applyType" required></select>
+        </label>
+        <div class="row">
+          <label>Start Date
+            <input type="date" id="applyStart" required />
+          </label>
+          <label>End Date
+            <input type="date" id="applyEnd" required />
+          </label>
+        </div>
+        <label>Reason (optional)
+          <textarea id="applyReason" rows="3" placeholder="Optional unless required by type"></textarea>
+        </label>
+        <button class="primary">Submit Application</button>
+      </form>
+      <div id="applyMsg" class="message"></div>
+    </section>
+
+    <section id="requestsSection" class="card hidden">
+      <h3>My Requests</h3>
+      <div id="myRequests" class="table"></div>
+    </section>
+
+    <section id="approvalsSection" class="card hidden">
+      <h3>Pending Approvals</h3>
+      <div id="pendingApprovals" class="table"></div>
+    </section>
+
+    <section id="holidaysSection" class="card hidden">
+      <h3>Upcoming Public Holidays</h3>
+      <ul id="holidaysList" class="list"></ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© <span id="year"></span> SheCanCode School</span>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

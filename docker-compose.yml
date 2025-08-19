@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  leave-service:
+    build:
+      context: ./leavemanagementsystem
+      dockerfile: Dockerfile
+    container_name: leave-service
+    env_file: .env
+    environment:
+      - DB_URL=${DB_URL}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXP_MINUTES=${JWT_EXP_MINUTES}
+      - LEAVE_SERVICE_PORT=${LEAVE_SERVICE_PORT}
+    depends_on:
+      - postgres
+    ports:
+      - "${LEAVE_SERVICE_HOST_PORT}:${LEAVE_SERVICE_PORT}"
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    env_file: .env
+    environment:
+      - AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
+      - DB_URL=${DB_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXP_MINUTES=${JWT_EXP_MINUTES}
+    depends_on:
+      - postgres
+    ports:
+      - "${AUTH_SERVICE_HOST_PORT}:${AUTH_SERVICE_PORT}"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "${FRONTEND_PORT}:80"
+    depends_on:
+      - auth-service
+      - leave-service
+
+volumes:
+  pgdata:

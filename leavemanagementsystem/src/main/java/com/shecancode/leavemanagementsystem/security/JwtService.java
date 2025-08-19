@@ -30,7 +30,8 @@ public class JwtService {
     public String generateToken(User user, Map<String, Object> extra) {
         Instant now = Instant.now();
         return Jwts.builder()
-                .setSubject(user.getId().toString())
+                // Use email as subject to allow external auth-service to issue tokens without DB coupling
+                .setSubject(user.getEmail())
                 .addClaims(extra)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plusSeconds(expMinutes * 60)))
