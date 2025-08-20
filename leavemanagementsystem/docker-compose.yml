@@ -1,0 +1,4 @@
+# NOTE: Do not run Docker Compose from this subfolder.
+# This file is intentionally left as guidance only.
+# Run `docker compose` from the project root (the folder that contains ../docker-compose.yml),
+# which defines the full stack: postgres, leave-service, auth-service, and frontend (Nginx on port 8088 by default).

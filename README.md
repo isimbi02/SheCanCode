@@ -17,6 +17,25 @@ Prerequisites: Docker Desktop (with Docker Compose v2)
 2) Start everything (Postgres + backends + Nginx frontend):
    - docker compose up -d --build
 
+After containers are up — what’s next?
+- Open the integrated frontend in your browser:
+  http://localhost:${env:FRONTEND_PORT -as [int] -ne $null ? $env:FRONTEND_PORT : 8088}
+- Log in with demo users (seeded on first run):
+  • staff@demo.com / Staff123! (STAFF)
+  • manager@demo.com / Manager123! (MANAGER)
+  • admin@demo.com / Admin123! (ADMIN)
+- Quick verification:
+  • Check services: docker compose ps
+  • Public API (should return holidays):
+    PowerShell: iwr http://localhost:${env:LEAVE_SERVICE_HOST_PORT -as [int] -ne $null ? $env:LEAVE_SERVICE_HOST_PORT : 8080}/api/public/holidays | select -exp Content
+  • From the frontend domain (through Nginx proxy):
+    PowerShell: iwr http://localhost:${env:FRONTEND_PORT -as [int] -ne $null ? $env:FRONTEND_PORT : 8088}/api/public/holidays | select -exp Content
+- If the page doesn’t load on 8088:
+  • Ensure you are running Docker Compose from the project root (the folder containing docker-compose.yml), not the leavemanagementsystem/ subfolder.
+  • Ensure the frontend container is running: docker compose ps
+  • View logs: docker compose logs -f frontend
+  • If 8088 is busy, set FRONTEND_PORT=3000 in .env, then: docker compose up -d --build
+
 3) Open the app:
    - Frontend (via Nginx): http://localhost:${env:FRONTEND_PORT -as [int] -ne $null ? $env:FRONTEND_PORT : 8088}
    - Leave service Swagger: http://localhost:${env:LEAVE_SERVICE_HOST_PORT -as [int] -ne $null ? $env:LEAVE_SERVICE_HOST_PORT : 8080}/swagger-ui/index.html
@@ -148,6 +167,7 @@ JWT_EXP_MINUTES=240
    - Auth service (if it exposes docs): http://localhost:8081
 
 Troubleshooting:
+- Make sure you run Docker Compose from the project root (the folder that contains docker-compose.yml), not from leavemanagementsystem/.
 - Port conflicts: change the *_HOST_PORT or FRONTEND_PORT values in .env, or rely on defaults set in docker-compose.yml. For example, set FRONTEND_PORT=3000 to use http://localhost:3000 instead.
 - Check services: docker compose ps
 - View logs: docker compose logs -f frontend leave-service auth-service postgres
@@ -197,3 +217,55 @@ Notes:
 ---
 
 Happy hacking! If something doesn’t start, run docker compose ps and docker compose logs -f to diagnose, or check the Spring Boot console for stack traces.
+
+
+---
+
+## Troubleshooting — Not seeing containers in Docker Desktop?
+
+If http://localhost:8088 says “This site can’t be reached” and you also don’t see containers in Docker Desktop, check the following:
+
+1) Ensure you ran Docker Compose from the project root
+- The project root is the folder that contains docker-compose.yml (alongside frontend/, auth-service/, leavemanagementsystem/).
+- Do NOT run docker compose from the leavemanagementsystem/ subfolder.
+
+2) Verify containers are running
+- docker compose ps
+- If you don’t see frontend, leave-service, auth-service, and postgres here, start them:
+  docker compose up -d --build
+- If they appear and immediately exit, inspect logs:
+  docker compose logs -f
+
+3) Confirm Docker context and Desktop is running
+- Docker Desktop must be running on Windows/macOS.
+- Check contexts:
+  docker context ls
+  The “CURRENT” context should be “default” (or a context connected to Docker Desktop). If it’s not, switch:
+  docker context use default
+
+4) Check for port conflicts (8088/8080/8081)
+- Test ports (PowerShell):
+  Test-NetConnection -ComputerName localhost -Port 8088
+  Test-NetConnection -ComputerName localhost -Port 8080
+- If 8088 is in use or blocked, change FRONTEND_PORT in .env, e.g. FRONTEND_PORT=3000, then:
+  docker compose up -d --build
+
+5) Quick HTTP checks (PowerShell)
+- Through Nginx (frontend port):
+  iwr http://localhost:${env:FRONTEND_PORT -as [int] -ne $null ? $env:FRONTEND_PORT : 8088}/api/public/holidays | select -exp Content
+- Direct to backend:
+  iwr http://localhost:${env:LEAVE_SERVICE_HOST_PORT -as [int] -ne $null ? $env:LEAVE_SERVICE_HOST_PORT : 8080}/api/public/holidays | select -exp Content
+
+6) Common causes
+- Running compose in the wrong directory (no containers created).
+- Docker Desktop not running, or wrong Docker context selected.
+- Containers exited due to a startup error (see logs) or DB not ready.
+- Port already in use by another process (change FRONTEND_PORT/LEAVE_SERVICE_HOST_PORT/AUTH_SERVICE_HOST_PORT in .env).
+
+7) Cleanup and retry
+- Stop: docker compose stop
+- Rebuild: docker compose up -d --build
+- If needed, prune unused resources (careful):
+  docker system prune -f
+
+If you still don’t see the containers in Docker Desktop but docker compose ps shows them, ensure the Docker Desktop UI isn’t filtered (Containers view → clear filters). Also verify you’re looking at the same Docker context that the CLI is using.
